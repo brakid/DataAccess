@@ -1,0 +1,31 @@
+Data access
+* access to datasets only if you have the token for it
+* purchase token
+* each dataset costs x amount of tokens
+* people that have provided their Images into a dataset will earn tokens for providing their Data into the dataset
+* cost of a dataset depends on size, each record pays 1 unit (different pricing schemes per Data type?)
+    * text data first
+* record
+* start with 1 dataset first
+* genererate dataset depeding on requested size -> shuffle(?), pay all data providers (?) or just the ones whose Data is in the set?
+* no manual data Insertion, but you grant access to ? FB, Google, WhatsApp?
+
+
+
+
+---
+User: uploads a record (verify it is not in the set yet)
+If successful upload: receive a DataProviderToken (transferable?) linked to the record
+1) tokens not linked to records:
+* when someone downloads a dataset with size x, they pay x in DataAccessTokens (burn), receive a one-time code? Or do they receive an NFT?
+1.1) they receive a code:
+ * can download the dataset once from the backend, after it: code is invalid
+ * code is public key encrypted and contains dataset size & purchaser address (how to make it safe)
+* DataAccessTokens are backed by some other token -> distributed to DataProviderToken holders (claimable)
+
+* burn DataProviderTokens
+1) not possible
+2) possible if tokens are linked to records
+
+* DataAccessToken is the currency
+* DataProviderToken is like shares in a pool (decisions on max number of records in datasets, mininum number of records, fees)
