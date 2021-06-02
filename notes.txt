@@ -23,6 +23,8 @@ If successful upload: receive a DataProviderToken (transferable?) linked to the 
  * code is public key encrypted and contains dataset size & purchaser address (how to make it safe)
 * DataAccessTokens are backed by some other token -> distributed to DataProviderToken holders (claimable)
 
+* pool all rewards for some time, claimable every day / automatically distributed?
+
 * burn DataProviderTokens
 1) not possible
 2) possible if tokens are linked to records
