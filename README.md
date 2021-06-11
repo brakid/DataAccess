@@ -1,7 +1,9 @@
 # DataAccess
-Machine Learning requires large amounts of data to product well-functioning models. So far data collected either stems from public sources, or large companies with access to vast amounts of user data can sell this data for profits. In addition, it leaves those who clea the data out of the picture: they receive a small compensation for providing the data once and then their curated data can be reused indefinitely.
+**Earn royalties on your provided data**
 
-This project aim to let data providers (individuals) and those whose data is used participate in the process:
+Machine Learning requires large amounts of data to product well-functioning models. So far data collected either stems from public sources, or large companies with access to vast amounts of user data can sell this data for profits. In addition, it leaves those who clean or provide their data out of the picture: they receive a small compensation for providing the data once and then their curated data can be reused indefinitely.
+
+This project aims to let data providers (individuals) and those whose data is used participate in the process:
 everytime someone uses the dataset their data is in, they receive a commission.
 
 ## Terms
@@ -17,7 +19,7 @@ everytime someone uses the dataset their data is in, they receive a commission.
 * DataAccessTokens are pegged to some other token and can be redeemed.
 * DataProviderTokens are not, but can be traded for dataset buy rewards.
  * whoever holds a token at the moment someone buys will receive them.
-* there is a fee of 5% when buying datasets, meaning 95% of the price will be distributed to holders.
+* there is a fee of 5% when buying datasets, meaning 95% of the price will be distributed to holders of DataProviderTokens.
 
 **Rewards can be claimed at any time**
 
