@@ -17,7 +17,7 @@ contract DataProviderToken is ERC20, Owned {
   uint256 private constant FEE = 5; // 5%
   uint256 private constant RECORDS_PER_DATA_ACCESS_TOKEN = 1000;
 
-  IERC20 private dataAccessToken;
+  IERC20 private immutable dataAccessToken;
 
   address[] private holders;
   mapping(address => Entry) holdersMap;
@@ -29,13 +29,13 @@ contract DataProviderToken is ERC20, Owned {
 
   event Provided(
     uint256 indexed timestamp,
-    address indexed providerAddress,
+    address indexed provider,
     uint256 recordCount
   );
 
   event Buy(
     uint256 indexed timestamp,
-    address indexed buyerAddress,
+    address indexed buyer,
     uint256 recordCount
   );
 

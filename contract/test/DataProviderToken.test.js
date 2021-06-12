@@ -38,6 +38,38 @@ describe('DataProviderToken', async () => {
     const hash = await web3.utils.soliditySha3(1, 100, otherAddress);
     const signature = await web3.eth.sign(hash, senderAddress);
     
-    await expectRevert(dataProviderToken.provide(1, 100, signature, { from: senderAddress }), 'Signature not valid');
+    await expectRevert(dataProviderToken.provide(1, 100, signature, { from: otherAddress }), 'Signature not valid');
+  });
+
+  it('should mint on valid signature', async () => {
+    const hash = await web3.utils.soliditySha3(100, 100, senderAddress);
+    const signature = await web3.eth.sign(hash, signerAddress);
+    
+    const receipt = await dataProviderToken.provide(100, 100, signature, { from: senderAddress });
+
+    expectEvent(receipt, 'Provided', {
+      provider: senderAddress,
+      recordCount: new BN(100),
+    });
+    
+    expect(await dataProviderToken.balanceOf(senderAddress)).to.be.bignumber.equal(new BN(100));
+  });
+
+  it('should reject on already used signature on valid signature', async () => {
+    const hash = await web3.utils.soliditySha3(101, 100, senderAddress);
+    const signature = await web3.eth.sign(hash, signerAddress);
+    
+    const receipt = await dataProviderToken.provide(101, 100, signature, { from: senderAddress });
+
+    expectEvent(receipt, 'Provided', {
+      provider: senderAddress,
+      recordCount: new BN(101),
+    });
+    
+    expect(await dataProviderToken.balanceOf(senderAddress)).to.be.bignumber.equal(new BN(101));
+
+    await expectRevert(dataProviderToken.provide(101, 100, signature, { from: senderAddress }), 'Signature already claimed');
+
+    expect(await dataProviderToken.balanceOf(senderAddress)).to.be.bignumber.equal(new BN(101));
   });
 });
