@@ -26,7 +26,7 @@ everytime someone uses the dataset their data is in, they receive a commission.
 ### DataProviderTokens:
 * provide record: private key encrypted confirmation containing (date, submitter address, number of records), store provided records to validate no duplicate token mints. Transfer tokens to submitter address if it matches the sender address
 * claim reward
-* buy access: send *DataAccessTokens* + number of records, emits event: public key encrypted (date, buyer address, number of records) -> backend reacts to it and grants access for dApp user if the date and wallet address match
+* buy access: send *DataAccessTokens* + number of records, emits event: event is emitted by constract and received by dApp. As the sender address is known, the dApp knows the source was the deployee contract. Sends (date, buyer address, number of records) -> backend reacts to it and grants access for dApp user if the date and wallet address match
 
 ### DataAccessTokens:
 * mint: exchange for other ERC20 token
