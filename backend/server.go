@@ -14,6 +14,7 @@ import (
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
+	"github.com/gin-gonic/gin"
 )
 
 type Transfer struct {
@@ -66,8 +67,8 @@ func receiveEvents(client *ethclient.Client) {
 }
 
 func main() {
-	fmt.Println("Started")
 
+	fmt.Println("Started")
 	/*client, err := ethclient.Dial("ws://127.0.0.1:9545/")
 	if err != nil {
 		log.Fatal(err)
@@ -95,4 +96,12 @@ func main() {
 	}
 
 	fmt.Println(hexutil.Encode(signedProvideTransaction.Signature))
+
+	r := gin.Default()
+	r.GET("/ping", func(c *gin.Context) {
+		c.JSON(200, gin.H{
+			"message": signedProvideTransaction,
+		})
+	})
+	r.Run()
 }

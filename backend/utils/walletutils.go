@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"math/big"
+	"time"
 
 	"github.com/ethereum/go-ethereum/accounts"
 	"github.com/ethereum/go-ethereum/common"
@@ -14,8 +15,8 @@ import (
 )
 
 type ProvideTransaction struct {
-	RecordCount   uint
-	Timestamp     uint
+	RecordCount   int64
+	Timestamp     int64
 	SenderAddress *common.Address
 }
 
@@ -40,8 +41,8 @@ func InstantiateWallet() (*hdwallet.Wallet, *accounts.Account, error) {
 	return wallet, &account, nil
 }
 
-func CreateProvideTransaction(recordCount uint, senderAddress *common.Address) (*ProvideTransaction, error) {
-	if recordCount == 0 {
+func CreateProvideTransaction(recordCount int64, senderAddress *common.Address) (*ProvideTransaction, error) {
+	if recordCount <= 0 {
 		return nil, errors.New("Invalid record count")
 	}
 
@@ -49,7 +50,7 @@ func CreateProvideTransaction(recordCount uint, senderAddress *common.Address) (
 		return nil, errors.New("Invalid sender address")
 	}
 
-	var timestamp uint = 123
+	timestamp := time.Now().Unix()
 	return &ProvideTransaction{recordCount, timestamp, senderAddress}, nil
 }
 
@@ -69,8 +70,8 @@ func SignHash(hash []byte, wallet *hdwallet.Wallet, signerAccount *accounts.Acco
 
 func SignProvideTransaction(provideTransaction *ProvideTransaction, wallet *hdwallet.Wallet, signerAccount *accounts.Account) (*SignedProvideTransaction, error) {
 	recordHash := solsha3.SoliditySHA3(
-		solsha3.Uint256(big.NewInt(int64(provideTransaction.RecordCount))),
-		solsha3.Uint256(big.NewInt(int64(provideTransaction.Timestamp))),
+		solsha3.Uint256(big.NewInt(provideTransaction.RecordCount)),
+		solsha3.Uint256(big.NewInt(provideTransaction.Timestamp)),
 		solsha3.Address(provideTransaction.SenderAddress.Hex()),
 	)
 
