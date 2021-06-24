@@ -13,9 +13,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
-	solsha3 "github.com/miguelmota/go-solidity-sha3"
 )
 
 type Transfer struct {
@@ -70,36 +68,31 @@ func receiveEvents(client *ethclient.Client) {
 func main() {
 	fmt.Println("Started")
 
-	client, err := ethclient.Dial("ws://127.0.0.1:9545/")
+	/*client, err := ethclient.Dial("ws://127.0.0.1:9545/")
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	fmt.Println("Connection established")
 
-	go receiveEvents(client)
+	go receiveEvents(client)*/
 
 	wallet, account, err := utils.InstantiateWallet()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	recordHash := solsha3.SoliditySHA3(
-		solsha3.Uint256(big.NewInt(1)),
-		solsha3.Uint256(big.NewInt(100)),
-		solsha3.Address("0x0Bbd79a85557A85d9912EaB87d349eE9cAb6c9e0"),
-	)
+	senderAddress := common.HexToAddress("0xF1E4D9fCEea60C3BA2c96C0bd5F3EcdeBfDc3D66")
 
-	fmt.Println(hexutil.Encode(recordHash))
-
-	privateKey, err := wallet.PrivateKey(*account)
-	if err != nil {
-		log.Fatal(err)
-	}
-	signature, err := crypto.Sign(recordHash, privateKey)
+	provideTransaction, err := utils.CreateProvideTransaction(1, &senderAddress)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	fmt.Println(hexutil.Encode(signature))
+	signedProvideTransaction, err := utils.SignProvideTransaction(provideTransaction, wallet, account)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println(hexutil.Encode(signedProvideTransaction.Signature))
 }
