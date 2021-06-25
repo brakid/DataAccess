@@ -2,13 +2,11 @@ package utils
 
 import (
 	"errors"
-	"fmt"
 	"math/big"
 	"time"
 
 	"github.com/ethereum/go-ethereum/accounts"
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
 	hdwallet "github.com/miguelmota/go-ethereum-hdwallet"
 	solsha3 "github.com/miguelmota/go-solidity-sha3"
@@ -74,8 +72,6 @@ func SignProvideTransaction(provideTransaction *ProvideTransaction, wallet *hdwa
 		solsha3.Uint256(big.NewInt(provideTransaction.Timestamp)),
 		solsha3.Address(provideTransaction.SenderAddress.Hex()),
 	)
-
-	fmt.Println(hexutil.Encode(recordHash))
 
 	signature, err := SignHash(recordHash, wallet, signerAccount)
 	if err != nil {

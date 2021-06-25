@@ -5,13 +5,14 @@ import (
 	"fmt"
 	"log"
 	"math/big"
+	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/brakid/dataaccess/utils"
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/gin-gonic/gin"
@@ -83,25 +84,40 @@ func main() {
 		log.Fatal(err)
 	}
 
-	senderAddress := common.HexToAddress("0xF1E4D9fCEea60C3BA2c96C0bd5F3EcdeBfDc3D66")
-
-	provideTransaction, err := utils.CreateProvideTransaction(1, &senderAddress)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	signedProvideTransaction, err := utils.SignProvideTransaction(provideTransaction, wallet, account)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	fmt.Println(hexutil.Encode(signedProvideTransaction.Signature))
-
 	r := gin.Default()
-	r.GET("/ping", func(c *gin.Context) {
-		c.JSON(200, gin.H{
+	r.GET("/provide", func(context *gin.Context) {
+		recordCountString := context.Query("recordCount")
+		senderAddressString := context.Query("senderAddress")
+
+		recordCount, err := strconv.ParseInt(recordCountString, 10, 64)
+		if err != nil {
+			context.String(http.StatusBadRequest, "Invalid record count")
+			return
+		}
+
+		if common.IsHexAddress(senderAddressString) == false {
+			context.String(http.StatusBadRequest, "Invalid Sender Address")
+			return
+		}
+
+		senderAddress := common.HexToAddress(senderAddressString)
+
+		provideTransaction, err := utils.CreateProvideTransaction(recordCount, &senderAddress)
+		if err != nil {
+			context.String(http.StatusBadRequest, err.Error())
+			return
+		}
+
+		signedProvideTransaction, err := utils.SignProvideTransaction(provideTransaction, wallet, account)
+		if err != nil {
+			context.String(http.StatusInternalServerError, err.Error())
+			return
+		}
+
+		context.JSON(http.StatusOK, gin.H{
 			"message": signedProvideTransaction,
 		})
+		return
 	})
 	r.Run()
 }
