@@ -5,38 +5,26 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/ethereum/go-ethereum/accounts"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 	hdwallet "github.com/miguelmota/go-ethereum-hdwallet"
 	solsha3 "github.com/miguelmota/go-solidity-sha3"
 )
 
-type ProvideTransaction struct {
-	RecordCount   int64
-	Timestamp     int64
-	SenderAddress *common.Address
-}
-
-type SignedProvideTransaction struct {
-	ProvideTransaction *ProvideTransaction
-	Signature          []byte
-}
-
-func InstantiateWallet() (*hdwallet.Wallet, *accounts.Account, error) {
+func InstantiateTransactionSigner() (*TransactionSigner, error) {
 	mnemonic := "impose believe guitar thrive clean tourist attitude edge swim stuff salon tiny"
 	wallet, err := hdwallet.NewFromMnemonic(mnemonic)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
 	path := hdwallet.MustParseDerivationPath("m/44'/60'/0'/0/0")
 	account, err := wallet.Derive(path, false)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
-	return wallet, &account, nil
+	return &TransactionSigner{wallet, &account}, nil
 }
 
 func CreateProvideTransaction(recordCount int64, senderAddress *common.Address) (*ProvideTransaction, error) {
@@ -52,8 +40,8 @@ func CreateProvideTransaction(recordCount int64, senderAddress *common.Address) 
 	return &ProvideTransaction{recordCount, timestamp, senderAddress}, nil
 }
 
-func SignHash(hash []byte, wallet *hdwallet.Wallet, signerAccount *accounts.Account) ([]byte, error) {
-	privateKey, err := wallet.PrivateKey(*signerAccount)
+func SignHash(hash []byte, transactionSigner *TransactionSigner) ([]byte, error) {
+	privateKey, err := transactionSigner.Wallet.PrivateKey(*transactionSigner.SignerAccount)
 	if err != nil {
 		return nil, err
 	}
@@ -66,14 +54,14 @@ func SignHash(hash []byte, wallet *hdwallet.Wallet, signerAccount *accounts.Acco
 	return signature, nil
 }
 
-func SignProvideTransaction(provideTransaction *ProvideTransaction, wallet *hdwallet.Wallet, signerAccount *accounts.Account) (*SignedProvideTransaction, error) {
+func SignProvideTransaction(provideTransaction *ProvideTransaction, transactionSigner *TransactionSigner) (*SignedProvideTransaction, error) {
 	recordHash := solsha3.SoliditySHA3(
 		solsha3.Uint256(big.NewInt(provideTransaction.RecordCount)),
 		solsha3.Uint256(big.NewInt(provideTransaction.Timestamp)),
 		solsha3.Address(provideTransaction.SenderAddress.Hex()),
 	)
 
-	signature, err := SignHash(recordHash, wallet, signerAccount)
+	signature, err := SignHash(recordHash, transactionSigner)
 	if err != nil {
 		return nil, err
 	}
