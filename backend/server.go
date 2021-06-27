@@ -26,6 +26,7 @@ func main() {
 		log.Fatal(err)
 	}
 
+	gin.ForceConsoleColor()
 	r := gin.Default()
 
 	r.GET("/provide", service.HandleProvide(transactionSigner))
