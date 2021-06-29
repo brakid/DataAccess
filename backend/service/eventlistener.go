@@ -15,12 +15,23 @@ import (
 )
 
 type Transfer struct {
-	From   common.Address
-	To     common.Address
+	From   *common.Address
+	To     *common.Address
 	Amount *big.Int
 }
 
-func ReceiveEvents(client *ethclient.Client) {
+type BuyEvent struct {
+	Timestamp    *big.Int
+	BuyerAddress *common.Address
+	RecordCount  *big.Int
+}
+
+type EventIdentifier struct {
+	ReceiverAddress *common.Address
+	RecordCount     int64
+}
+
+func ReceiveEvents(client *ethclient.Client, receivedEvents *map[*EventIdentifier]*BuyEvent) {
 	logs := make(chan types.Log)
 	contractAddress := common.HexToAddress("0xC7CF75B1A17c21BD9DdF84BB0BC15736e8096Df3")
 	query := ethereum.FilterQuery{
@@ -45,19 +56,26 @@ func ReceiveEvents(client *ethclient.Client) {
 		case err := <-sub.Err():
 			log.Fatal(err)
 		case eventLog := <-logs:
-			if eventLog.Topics[0].Hex() == contractAbi.Events["Transfer"].ID.Hex() {
-				transferEvent := Transfer{}
-				transferEvent.From = common.HexToAddress(eventLog.Topics[1].Hex())
-				transferEvent.To = common.HexToAddress(eventLog.Topics[2].Hex())
+			if eventLog.Topics[0].Hex() == contractAbi.Events["Buy"].ID.Hex() {
+				buyEvent := BuyEvent{}
+				buyEvent.Timestamp = eventLog.Topics[1].Big()
+				buyerAddress := common.HexToAddress(eventLog.Topics[2].Hex())
+				buyEvent.BuyerAddress = &buyerAddress
 
-				amounts, err := contractAbi.Unpack("Transfer", eventLog.Data)
+				recordCounts, err := contractAbi.Unpack("Buy", eventLog.Data)
 				if err != nil {
 					log.Fatal(err)
 				}
-				amount := amounts[0].(*big.Int)
-				transferEvent.Amount = amount
+				recordCount := recordCounts[0].(*big.Int)
+				buyEvent.RecordCount = recordCount
 
-				fmt.Println(transferEvent)
+				fmt.Println(buyEvent)
+
+				eventIdentifier := EventIdentifier{}
+				eventIdentifier.ReceiverAddress = buyEvent.BuyerAddress
+				eventIdentifier.RecordCount = buyEvent.RecordCount.Int64()
+
+				(*receivedEvents)[&eventIdentifier] = &buyEvent
 			}
 		}
 	}
