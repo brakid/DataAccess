@@ -7,11 +7,20 @@ import (
 
 	"github.com/brakid/dataaccess/service"
 	"github.com/brakid/dataaccess/utils"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
+	contractAbi, err := utils.GetContractAbi()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	contractAddress := common.HexToAddress("0xC7CF75B1A17c21BD9DdF84BB0BC15736e8096Df3")
+	contract := utils.Contract{ContractAddress: &contractAddress, ContractAbi: contractAbi}
+
 	receivedBuyEvents := sync.Map{}
 
 	fmt.Println("Started")
@@ -22,7 +31,7 @@ func main() {
 
 	fmt.Println("Connection established")
 
-	go service.ReceiveEvents(client, &receivedBuyEvents)
+	go service.ReceiveEvents(client, &receivedBuyEvents, &contract)
 
 	transactionSigner, err := utils.InstantiateTransactionSigner()
 	if err != nil {
