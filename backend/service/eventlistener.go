@@ -6,7 +6,9 @@ import (
 	"log"
 	"math/big"
 	"strings"
+	"sync"
 
+	"github.com/brakid/dataaccess/utils"
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
@@ -14,24 +16,7 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 )
 
-type Transfer struct {
-	From   *common.Address
-	To     *common.Address
-	Amount *big.Int
-}
-
-type BuyEvent struct {
-	Timestamp    *big.Int
-	BuyerAddress *common.Address
-	RecordCount  *big.Int
-}
-
-type EventIdentifier struct {
-	ReceiverAddress *common.Address
-	RecordCount     int64
-}
-
-func ReceiveEvents(client *ethclient.Client, receivedEvents *map[*EventIdentifier]*BuyEvent) {
+func ReceiveEvents(client *ethclient.Client, receivedBuyEvents *sync.Map) {
 	logs := make(chan types.Log)
 	contractAddress := common.HexToAddress("0xC7CF75B1A17c21BD9DdF84BB0BC15736e8096Df3")
 	query := ethereum.FilterQuery{
@@ -57,7 +42,7 @@ func ReceiveEvents(client *ethclient.Client, receivedEvents *map[*EventIdentifie
 			log.Fatal(err)
 		case eventLog := <-logs:
 			if eventLog.Topics[0].Hex() == contractAbi.Events["Buy"].ID.Hex() {
-				buyEvent := BuyEvent{}
+				buyEvent := utils.BuyEvent{}
 				buyEvent.Timestamp = eventLog.Topics[1].Big()
 				buyerAddress := common.HexToAddress(eventLog.Topics[2].Hex())
 				buyEvent.BuyerAddress = &buyerAddress
@@ -71,11 +56,11 @@ func ReceiveEvents(client *ethclient.Client, receivedEvents *map[*EventIdentifie
 
 				fmt.Println(buyEvent)
 
-				eventIdentifier := EventIdentifier{}
-				eventIdentifier.ReceiverAddress = buyEvent.BuyerAddress
+				eventIdentifier := utils.EventIdentifier{}
+				eventIdentifier.BuyerAddress = *buyEvent.BuyerAddress
 				eventIdentifier.RecordCount = buyEvent.RecordCount.Int64()
 
-				(*receivedEvents)[&eventIdentifier] = &buyEvent
+				receivedBuyEvents.Store(eventIdentifier, &buyEvent)
 			}
 		}
 	}

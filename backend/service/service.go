@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"sync"
 
 	"github.com/brakid/dataaccess/utils"
 	"github.com/ethereum/go-ethereum/common"
@@ -20,6 +21,11 @@ type Record struct {
 type ProvideContent struct {
 	Records       []Record
 	SenderAddress string
+}
+
+type BuyContent struct {
+	RecordCount  int64
+	BuyerAddress string
 }
 
 func HandleProvide(transactionSigner *utils.TransactionSigner) func(context *gin.Context) {
@@ -62,6 +68,46 @@ func HandleProvide(transactionSigner *utils.TransactionSigner) func(context *gin
 		}
 
 		context.JSON(http.StatusOK, signedProvideTransaction)
+		return
+	}
+}
+
+func HandleBuy(receivedBuyEvents *sync.Map) func(context *gin.Context) {
+	return func(context *gin.Context) {
+		jsonData, err := ioutil.ReadAll(context.Request.Body)
+
+		if err != nil {
+			context.String(http.StatusBadGateway, err.Error())
+			return
+		}
+		buyContent := BuyContent{}
+		err = json.Unmarshal(jsonData, &buyContent)
+
+		if err != nil {
+			context.String(http.StatusBadRequest, err.Error())
+			return
+		}
+
+		fmt.Println(buyContent)
+
+		if common.IsHexAddress(buyContent.BuyerAddress) == false {
+			context.String(http.StatusBadRequest, "Invalid Sender Address")
+			return
+		}
+
+		buyerAddress := common.HexToAddress(buyContent.BuyerAddress)
+
+		eventIdentifier := utils.EventIdentifier{BuyerAddress: buyerAddress, RecordCount: buyContent.RecordCount}
+
+		_, ok := receivedBuyEvents.Load(eventIdentifier)
+
+		if ok {
+			receivedBuyEvents.Delete(eventIdentifier) // preventing multiple access
+			context.String(http.StatusOK, "Returning records")
+			return
+		}
+
+		context.String(http.StatusForbidden, "No event received")
 		return
 	}
 }

@@ -2,12 +2,24 @@ package utils
 
 import (
 	"errors"
+	"math/big"
 	"time"
 
 	"github.com/ethereum/go-ethereum/accounts"
 	"github.com/ethereum/go-ethereum/common"
 	hdwallet "github.com/miguelmota/go-ethereum-hdwallet"
 )
+
+type BuyEvent struct {
+	Timestamp    *big.Int
+	BuyerAddress *common.Address
+	RecordCount  *big.Int
+}
+
+type EventIdentifier struct {
+	BuyerAddress common.Address
+	RecordCount  int64
+}
 
 type TransactionSigner struct {
 	Wallet        *hdwallet.Wallet

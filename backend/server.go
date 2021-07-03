@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"sync"
 
 	"github.com/brakid/dataaccess/service"
 	"github.com/brakid/dataaccess/utils"
@@ -11,7 +12,7 @@ import (
 )
 
 func main() {
-	receivedEvents := make(map[*service.EventIdentifier]*service.BuyEvent)
+	receivedBuyEvents := sync.Map{}
 
 	fmt.Println("Started")
 	client, err := ethclient.Dial("ws://127.0.0.1:9545/")
@@ -21,7 +22,7 @@ func main() {
 
 	fmt.Println("Connection established")
 
-	go service.ReceiveEvents(client, &receivedEvents)
+	go service.ReceiveEvents(client, &receivedBuyEvents)
 
 	transactionSigner, err := utils.InstantiateTransactionSigner()
 	if err != nil {
@@ -32,6 +33,7 @@ func main() {
 	r := gin.Default()
 
 	r.GET("/provide", service.HandleProvide(transactionSigner))
+	r.GET("/buy", service.HandleBuy(&receivedBuyEvents))
 
 	r.Run()
 }
