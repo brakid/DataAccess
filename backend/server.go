@@ -18,7 +18,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	contractAddress := common.HexToAddress("0xC7CF75B1A17c21BD9DdF84BB0BC15736e8096Df3")
+	contractAddress := common.HexToAddress("0x734A805767578Da71b6c7B13fd9DdbDaC2b55238")
 	contract := utils.Contract{ContractAddress: &contractAddress, ContractAbi: contractAbi}
 
 	receivedBuyEvents := sync.Map{}

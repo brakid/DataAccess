@@ -27,6 +27,10 @@ contract DataAccessToken is ERC20 {
     usdc = IERC20(usdcAddress);
   }
 
+  function decimals() public pure override returns (uint8) {
+    return 0;
+  }
+
   function mint(uint dataAccessTokenCount) external {
     require(dataAccessTokenCount > 0, 'Positive token requests only');
     uint usdcAmount = convertToUsdc(dataAccessTokenCount);
@@ -45,9 +49,9 @@ contract DataAccessToken is ERC20 {
   }
 
   function convertToUsdc(uint dataAccessTokenCount) internal pure returns (uint256) {
-    // dataAccessTokenCount (in x * 10^18) * factor / 10^6
+    // dataAccessTokenCount (in x * factor * 10^6)
     return 
-        SafeMath.div(
+        SafeMath.mul(
           SafeMath.mul(dataAccessTokenCount, CONVERSION_FACTOR), 
           USDC_DECIMALS);
   }

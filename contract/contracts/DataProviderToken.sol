@@ -70,7 +70,7 @@ contract DataProviderToken is ERC20, Owned {
   function buy(uint256 recordCount) external {
     require(recordCount > 0, "Requests for positive number of records only");
     uint256 dataAccessTokenCount = 
-        SafeMath.div(SafeMath.mul(recordCount, 10**18), RECORDS_PER_DATA_ACCESS_TOKEN);
+        SafeMath.div(recordCount, RECORDS_PER_DATA_ACCESS_TOKEN);
 
     require(dataAccessToken.balanceOf(msg.sender) >= dataAccessTokenCount, "Balance not large enough");
     require(dataAccessToken.allowance(msg.sender, address(this)) >= dataAccessTokenCount, "Allowance not large enough");

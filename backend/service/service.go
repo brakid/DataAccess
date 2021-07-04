@@ -103,7 +103,7 @@ func HandleBuy(receivedBuyEvents *sync.Map) func(context *gin.Context) {
 
 		if ok {
 			receivedBuyEvents.Delete(eventIdentifier) // preventing multiple access
-			context.String(http.StatusOK, "Returning records")
+			context.String(http.StatusOK, fmt.Sprintf("Returning %v records", eventIdentifier.RecordCount))
 			return
 		}
 
