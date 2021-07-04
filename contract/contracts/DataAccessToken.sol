@@ -6,8 +6,9 @@ import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
 contract DataAccessToken is ERC20 {
   IERC20 public immutable usdc;
-  uint private constant CONVERSION_FACTOR = 1; // 1 USDC = 1 DataAccessToken, price: 1 token per 1000 records
+  uint private constant CONVERSION_FACTOR = 1; // 1 USDC = 1*(10**18) DataAccessToken, price: 1 token per 1000 records
   uint private constant USDC_DECIMALS = 10**6;
+  uint private constant TOKEN_DECIMALS = 10**18;
 
   event Mint (
     uint256 indexed timestamp,
@@ -25,10 +26,6 @@ contract DataAccessToken is ERC20 {
 
   constructor(address usdcAddress) ERC20('Data Access Token', 'DAT') {
     usdc = IERC20(usdcAddress);
-  }
-
-  function decimals() public pure override returns (uint8) {
-    return 0;
   }
 
   function mint(uint dataAccessTokenCount) external {
@@ -49,10 +46,12 @@ contract DataAccessToken is ERC20 {
   }
 
   function convertToUsdc(uint dataAccessTokenCount) internal pure returns (uint256) {
-    // dataAccessTokenCount (in x * factor * 10^6)
+    // dataAccessTokenCount (x/10**18) * factor * 10^6
     return 
         SafeMath.mul(
-          SafeMath.mul(dataAccessTokenCount, CONVERSION_FACTOR), 
+          SafeMath.mul(
+            SafeMath.div(dataAccessTokenCount, TOKEN_DECIMALS),
+            CONVERSION_FACTOR), 
           USDC_DECIMALS);
   }
 }

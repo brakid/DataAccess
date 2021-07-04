@@ -18,4 +18,6 @@ export interface EthereumData<T> extends Providers {
 
 export interface Contracts {
   usdc: ethers.Contract,
+  dataAccessToken: ethers.Contract,
+  dataProviderToken: ethers.Contract,
 };

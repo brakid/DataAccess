@@ -50,10 +50,6 @@ contract DataProviderToken is ERC20, Owned {
     signer = _signer;
   }
 
-  function decimals() public pure override returns (uint8) {
-    return 0;
-  }
-
   function provide(uint256 recordCount, uint256 timestamp, bytes memory signature) external {
     bool valid = validate(recordCount, timestamp, msg.sender, signature);
     
@@ -70,7 +66,7 @@ contract DataProviderToken is ERC20, Owned {
   function buy(uint256 recordCount) external {
     require(recordCount > 0, "Requests for positive number of records only");
     uint256 dataAccessTokenCount = 
-        SafeMath.div(recordCount, RECORDS_PER_DATA_ACCESS_TOKEN);
+        SafeMath.mul(SafeMath.div(recordCount, RECORDS_PER_DATA_ACCESS_TOKEN), 10**18);
 
     require(dataAccessToken.balanceOf(msg.sender) >= dataAccessTokenCount, "Balance not large enough");
     require(dataAccessToken.allowance(msg.sender, address(this)) >= dataAccessTokenCount, "Allowance not large enough");
