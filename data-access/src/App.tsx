@@ -69,7 +69,9 @@ const App = () => {
       await contracts?.usdc.increaseAllowance(contracts.dataAccessToken.address, LARGE_ALLOWANCE);
     }
 
-    await contracts?.dataAccessToken.mint(utils.parseUnits("100", 18));
+    const buyTransaction = await contracts?.dataAccessToken.mint(utils.parseUnits("100", 18));
+    await buyTransaction.wait();
+    setConfirmation('Buying access tokens successful');
   }
 
   const buyAccess = async () => {
@@ -92,6 +94,12 @@ const App = () => {
     setConfirmation('Providing records successful');
   }
 
+  const claim = async () => {
+    const claimTransaction = await contracts?.dataProviderToken.claim();
+    await claimTransaction.wait();
+    setConfirmation('Claiming earnings successful');
+  }
+
   return (
     <EthereumContext.Provider value={ { ...providers, address, data: contracts, block } }>
       <Header />
@@ -101,6 +109,7 @@ const App = () => {
         <button onClick={ (e) => handleError(buyTokens) }>Buy Data Access Tokens</button>
         <button onClick={ (e) => handleError(buyAccess) }>Buy Access</button>
         <button onClick={ (e) => handleError(provide) }>Provide Data</button>
+        <button onClick={ (e) => handleError(claim) }>Claim Earnings</button>
       </main>
       <footer className='navbar navbar-expand-lg navbar-dark bg-dark text-light mt-5'>
         <div className='container justify-content-md-center'>
