@@ -1,6 +1,8 @@
 package utils
 
 import (
+	"encoding/hex"
+	"fmt"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/crypto"
@@ -20,6 +22,8 @@ func InstantiateTransactionSigner() (*TransactionSigner, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	fmt.Printf("Signer account: %v\n", account.Address.Hex())
 
 	return &TransactionSigner{wallet, &account}, nil
 }
@@ -45,10 +49,15 @@ func (transactionSigner *TransactionSigner) SignProvideTransaction(provideTransa
 		solsha3.Address(provideTransaction.SenderAddress.Hex()),
 	)
 
-	signature, err := transactionSigner.signHash(recordHash)
+	signatureHash := solsha3.SoliditySHA3(
+		solsha3.String("\x19Ethereum Signed Message:\n32"),
+		solsha3.Bytes32(recordHash),
+	)
+
+	signature, err := transactionSigner.signHash(signatureHash)
 	if err != nil {
 		return nil, err
 	}
 
-	return &SignedProvideTransaction{provideTransaction, signature}, nil
+	return &SignedProvideTransaction{provideTransaction, "0x" + hex.EncodeToString(signature)}, nil
 }

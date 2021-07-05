@@ -11,6 +11,7 @@ const Header = () => {
   const [ dataAccessTokenBalance, setDataAccessTokenBalance ] = useState<BigNumber>(BigNumber.from(0));
   const [ dataAccessTokenDecimals, setDataAccessTokenDecimals ] = useState<number>(18);
   const [ dataProviderTokenBalance, setDataProviderTokenBalance ] = useState<BigNumber>(BigNumber.from(0));
+  const [ dataAccessTokenClaims, setDataAccessTokenClaims ] = useState<BigNumber>(BigNumber.from(0));
 
   useEffect(() => {
     const getBalances = async () => {
@@ -20,6 +21,7 @@ const Header = () => {
         setDataAccessTokenBalance(await contracts.dataAccessToken.balanceOf(address));
         setDataAccessTokenDecimals(await contracts.dataAccessToken.decimals());
         setDataProviderTokenBalance(await contracts.dataProviderToken.balanceOf(address));
+        setDataAccessTokenClaims(await contracts.dataProviderToken.showUnclaimed());
       }
     };
 
@@ -41,7 +43,7 @@ const Header = () => {
             <div className='col-md-6 pl-0'>
               <div className='col-12'><i className='fas fa-comment-dollar'></i> USDC Balance: { ethers.utils.formatUnits(usdcBalance, usdcDecimals) } USDC</div>
               <div className='col-12'><i className='fas fa-comment-dollar'></i> DataAccessTokens: { ethers.utils.formatUnits(dataAccessTokenBalance, dataAccessTokenDecimals) }</div>
-              <div className='col-12'><i className='fas fa-comment-dollar'></i> DataProviderTokens: { dataProviderTokenBalance.toString() }</div>
+              <div className='col-12'><i className='fas fa-comment-dollar'></i> DataProviderTokens: { dataProviderTokenBalance.toString() }, { ethers.utils.formatUnits(dataAccessTokenClaims, dataAccessTokenDecimals) } claimable</div>
             </div>
           </div>
         </div>

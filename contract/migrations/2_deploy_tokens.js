@@ -5,7 +5,7 @@ const DataProviderToken = artifacts.require('DataProviderToken.sol');
 module.exports = async (deployer, network, addresses) => {
   const [ signer, owner ] = addresses;
 
-  const randomSeed = Math.round(Math.random() * 1000000);
+  console.log('Signer: ' + signer);
 
   if (network === 'development' || network == 'develop') {
     await deployer.deploy(UsdcMock);

@@ -40,7 +40,7 @@ type ProvideTransaction struct {
 
 type SignedProvideTransaction struct {
 	ProvideTransaction *ProvideTransaction
-	Signature          []byte
+	Signature          string
 }
 
 func CreateProvideTransaction(recordCount int64, senderAddress *common.Address) (*ProvideTransaction, error) {

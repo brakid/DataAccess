@@ -9,6 +9,7 @@ import (
 	"github.com/brakid/dataaccess/utils"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
@@ -41,8 +42,10 @@ func main() {
 	gin.ForceConsoleColor()
 	r := gin.Default()
 
-	r.GET("/provide", service.HandleProvide(transactionSigner))
-	r.GET("/buy", service.HandleBuy(&receivedBuyEvents))
+	r.Use(cors.Default())
+
+	r.POST("/provide", service.HandleProvide(transactionSigner))
+	r.POST("/buy", service.HandleBuy(&receivedBuyEvents))
 
 	r.Run()
 }

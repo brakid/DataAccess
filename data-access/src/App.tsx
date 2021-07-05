@@ -4,7 +4,8 @@ import { getContracts } from './utils/contracts';
 import { getWeb3Provider, getWebsocketProvider } from './utils/ethereum';
 import { LARGE_ALLOWANCE } from './utils/helpers';
 import { utils } from 'ethers';
-import { EthereumData, Contracts, Providers, Block } from './utils/types';
+import { EthereumData, Contracts, Providers, Block, SignedTransaction } from './utils/types';
+import { provideData } from './utils/service';
 
 export const defaultBlock: Block = {
   blockNumber: -1,
@@ -68,12 +69,21 @@ const App = () => {
     await contracts?.dataProviderToken.buy(1000);
   }
 
+  const provide = async () => {
+    const signedTransaction: SignedTransaction = await provideData(address || '');
+
+    console.log(JSON.stringify(signedTransaction));
+
+    await contracts?.dataProviderToken.provide(signedTransaction.provideTransaction.recordCount, signedTransaction.provideTransaction.timestamp, signedTransaction.signature);
+  }
+
   return (
     <EthereumContext.Provider value={ { ...providers, address, data: contracts, block } }>
       <Header />
       <main role='main'>
         <button onClick={ (e) => buyTokens() }>Buy Data Access Tokens</button>
         <button onClick={ (e) => buyAccess() }>Buy Access</button>
+        <button onClick={ (e) => provide() }>Provide Data</button>
       </main>
       <footer className='navbar navbar-expand-lg navbar-dark bg-dark text-light mt-5'>
         <div className='container justify-content-md-center'>

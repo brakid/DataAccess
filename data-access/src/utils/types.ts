@@ -21,3 +21,14 @@ export interface Contracts {
   dataAccessToken: ethers.Contract,
   dataProviderToken: ethers.Contract,
 };
+
+export interface ProvideTransaction {
+  recordCount: number,
+  timestamp: number,
+  senderAddress: string,
+}
+
+export interface SignedTransaction {
+  provideTransaction: ProvideTransaction,
+  signature: string
+}
