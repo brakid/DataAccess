@@ -12,7 +12,7 @@ export const provideData = async (senderAddress: string): Promise<SignedTransact
     });
       
     const jsonContent = await response.json();
-    
+
     return {
       provideTransaction: {
         recordCount: jsonContent['ProvideTransaction']['RecordCount'],
@@ -21,6 +21,25 @@ export const provideData = async (senderAddress: string): Promise<SignedTransact
       },
       signature: jsonContent['Signature']
     }
+  } catch (e) {
+    throw new Error(e);
+  }
+}
+
+export const buyData = async (recordCount: number, buyerAddress: string): Promise<string> => {
+  try {
+    const response = await fetch('http://localhost:8080/buy', {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ recordCount, buyerAddress })
+    });
+      
+    const jsonContent = await response.text();
+    
+    return JSON.stringify(jsonContent);
   } catch (e) {
     throw new Error(e);
   }

@@ -2,10 +2,10 @@ import React, { useEffect, useState } from 'react';
 import Header from './Header';
 import { getContracts } from './utils/contracts';
 import { getWeb3Provider, getWebsocketProvider } from './utils/ethereum';
-import { LARGE_ALLOWANCE, showError } from './utils/helpers';
+import { LARGE_ALLOWANCE, showConfirmation, showError } from './utils/helpers';
 import { utils } from 'ethers';
 import { EthereumData, Contracts, Providers, Block, SignedTransaction } from './utils/types';
-import { provideData } from './utils/service';
+import { buyData, provideData } from './utils/service';
 
 export const defaultBlock: Block = {
   blockNumber: -1,
@@ -20,6 +20,7 @@ const App = () => {
   const [ block, setBlock ] = useState<Block>(defaultBlock);
   const [ contracts, setContracts ] = useState<Contracts>();
   const [ error, setError ] = useState<string>();
+  const [ confirmation, setConfirmation ] = useState<string>();
 
   useEffect(() => {
     const init = async () => {
@@ -55,6 +56,7 @@ const App = () => {
   const handleError = async (call: () => Promise<void>) => {
     try {
       setError('');
+      setConfirmation('');
       await call()
     } catch (e) {
       setError(JSON.stringify(e));
@@ -63,32 +65,38 @@ const App = () => {
 
   const buyTokens = async () => {
     const usdcAllowance = await contracts?.usdc.allowance(address, contracts.dataAccessToken.address);
-    console.log(usdcAllowance.toString());
-
-    await contracts?.usdc.increaseAllowance(contracts.dataAccessToken.address, LARGE_ALLOWANCE);
+    if (usdcAllowance < 1) {
+      await contracts?.usdc.increaseAllowance(contracts.dataAccessToken.address, LARGE_ALLOWANCE);
+    }
 
     await contracts?.dataAccessToken.mint(utils.parseUnits("100", 18));
   }
 
   const buyAccess = async () => {
     const dataAccessTokenAllowance = await contracts?.dataAccessToken.allowance(address, contracts.dataProviderToken.address);
-    console.log(dataAccessTokenAllowance.toString());
+    if (dataAccessTokenAllowance < 1) { 
+      await contracts?.dataAccessToken.increaseAllowance(contracts.dataProviderToken.address, LARGE_ALLOWANCE);
+    }
 
-    await contracts?.dataAccessToken.increaseAllowance(contracts.dataProviderToken.address, LARGE_ALLOWANCE);
-
-    await contracts?.dataProviderToken.buy(1000);
+    const buyTransaction = await contracts?.dataProviderToken.buy(1000);
+    await buyTransaction.wait();
+    setConfirmation('Buying records successful');
+    console.log(await buyData(1000, address || ''));
   }
 
   const provide = async () => {
     const signedTransaction: SignedTransaction = await provideData(address || '');
 
-    await contracts?.dataProviderToken.provide(signedTransaction.provideTransaction.recordCount, signedTransaction.provideTransaction.timestamp, signedTransaction.signature);
+    const provideTransaction = await contracts?.dataProviderToken.provide(signedTransaction.provideTransaction.recordCount, signedTransaction.provideTransaction.timestamp, signedTransaction.signature);
+    await provideTransaction.wait();
+    setConfirmation('Providing records successful');
   }
 
   return (
     <EthereumContext.Provider value={ { ...providers, address, data: contracts, block } }>
       <Header />
       { error && showError(error) }
+      { confirmation && showConfirmation(confirmation) }
       <main role='main'>
         <button onClick={ (e) => handleError(buyTokens) }>Buy Data Access Tokens</button>
         <button onClick={ (e) => handleError(buyAccess) }>Buy Access</button>

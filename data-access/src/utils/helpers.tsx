@@ -14,3 +14,16 @@ export const showError = (error: string | undefined): JSX.Element | null => {
     </div>
   );
 }
+
+export const showConfirmation = (confirmation: string | undefined): JSX.Element | null => {
+  if (!!!confirmation || confirmation.length === 0) {
+    return (null);
+  }
+
+  return (
+    <div className='alert alert-success' role='alert'>
+      <b>Confirmation: </b>
+      { confirmation }
+    </div>
+  );
+}
