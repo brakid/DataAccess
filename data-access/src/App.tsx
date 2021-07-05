@@ -67,7 +67,7 @@ const App = () => {
 
     await contracts?.usdc.increaseAllowance(contracts.dataAccessToken.address, LARGE_ALLOWANCE);
 
-    await contracts?.dataAccessToken.mint(utils.parseUnits("100", 10**18));
+    await contracts?.dataAccessToken.mint(utils.parseUnits("100", 18));
   }
 
   const buyAccess = async () => {

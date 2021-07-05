@@ -32,6 +32,7 @@ contract DataAccessToken is ERC20 {
     require(dataAccessTokenCount > 0, 'Positive token requests only');
     uint usdcAmount = convertToUsdc(dataAccessTokenCount);
     require(usdcAmount <= SafeMath.mul(1000, USDC_DECIMALS), 'At most 1000 USDC can be exchanged');
+    require(usdcAmount > 0, 'At least 0.000001 USDC need to be exchanged');
     usdc.transferFrom(msg.sender, address(this), usdcAmount); // lock USDC in this contract
     _mint(msg.sender, dataAccessTokenCount);
     emit Mint(block.timestamp, msg.sender, usdcAmount, dataAccessTokenCount);
@@ -46,12 +47,12 @@ contract DataAccessToken is ERC20 {
   }
 
   function convertToUsdc(uint dataAccessTokenCount) internal pure returns (uint256) {
-    // dataAccessTokenCount (x/10**18) * factor * 10^6
+    // dataAccessTokenCount (x * factor * 10^6) / 10**18
     return 
-        SafeMath.mul(
+        SafeMath.div(
           SafeMath.mul(
-            SafeMath.div(dataAccessTokenCount, TOKEN_DECIMALS),
+            SafeMath.mul(dataAccessTokenCount, USDC_DECIMALS),
             CONVERSION_FACTOR), 
-          USDC_DECIMALS);
+          TOKEN_DECIMALS);
   }
 }

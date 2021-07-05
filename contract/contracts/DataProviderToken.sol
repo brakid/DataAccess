@@ -3,8 +3,6 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
-import "@openzeppelin/contracts/token/ERC721/utils/ERC721Holder.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "./Owned.sol";
 
@@ -16,6 +14,7 @@ struct Entry {
 contract DataProviderToken is ERC20, Owned {
   uint256 private constant FEE = 5; // 5%
   uint256 private constant RECORDS_PER_DATA_ACCESS_TOKEN = 1000;
+  uint private constant ACCESS_TOKEN_DECIMALS = 10**18;
 
   IERC20 private immutable dataAccessToken;
 
@@ -66,15 +65,22 @@ contract DataProviderToken is ERC20, Owned {
   function buy(uint256 recordCount) external {
     require(recordCount > 0, "Requests for positive number of records only");
     uint256 dataAccessTokenCount = 
-        SafeMath.mul(SafeMath.div(recordCount, RECORDS_PER_DATA_ACCESS_TOKEN), 10**18);
+        SafeMath.div(
+          SafeMath.mul(recordCount, ACCESS_TOKEN_DECIMALS), 
+          RECORDS_PER_DATA_ACCESS_TOKEN);
 
+    require(dataAccessTokenCount > 0, "Record count too small");
     require(dataAccessToken.balanceOf(msg.sender) >= dataAccessTokenCount, "Balance not large enough");
     require(dataAccessToken.allowance(msg.sender, address(this)) >= dataAccessTokenCount, "Allowance not large enough");
 
     dataAccessToken.transferFrom(msg.sender, address(this), dataAccessTokenCount); //lock in contract
 
     uint256 rewardsToDistribute = 
-      SafeMath.div(SafeMath.mul(dataAccessTokenCount, FEE), 100);
+      SafeMath.div(
+        SafeMath.mul(
+          dataAccessTokenCount, 
+          SafeMath.sub(100, FEE)),
+        100);
     
     uint256 rewardsDistributed = 0;
 
