@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import Header from './Header';
 import { getContracts } from './utils/contracts';
 import { getWeb3Provider, getWebsocketProvider } from './utils/ethereum';
-import { LARGE_ALLOWANCE } from './utils/helpers';
+import { LARGE_ALLOWANCE, showError } from './utils/helpers';
 import { utils } from 'ethers';
 import { EthereumData, Contracts, Providers, Block, SignedTransaction } from './utils/types';
 import { provideData } from './utils/service';
@@ -19,6 +19,7 @@ const App = () => {
   const [ address, setAddress ] = useState<string>();
   const [ block, setBlock ] = useState<Block>(defaultBlock);
   const [ contracts, setContracts ] = useState<Contracts>();
+  const [ error, setError ] = useState<string>();
 
   useEffect(() => {
     const init = async () => {
@@ -51,6 +52,15 @@ const App = () => {
     init();
   }, []);
 
+  const handleError = async (call: () => Promise<void>) => {
+    try {
+      setError('');
+      await call()
+    } catch (e) {
+      setError(JSON.stringify(e));
+    }
+  }
+
   const buyTokens = async () => {
     const usdcAllowance = await contracts?.usdc.allowance(address, contracts.dataAccessToken.address);
     console.log(usdcAllowance.toString());
@@ -72,18 +82,17 @@ const App = () => {
   const provide = async () => {
     const signedTransaction: SignedTransaction = await provideData(address || '');
 
-    console.log(JSON.stringify(signedTransaction));
-
     await contracts?.dataProviderToken.provide(signedTransaction.provideTransaction.recordCount, signedTransaction.provideTransaction.timestamp, signedTransaction.signature);
   }
 
   return (
     <EthereumContext.Provider value={ { ...providers, address, data: contracts, block } }>
       <Header />
+      { error && showError(error) }
       <main role='main'>
-        <button onClick={ (e) => buyTokens() }>Buy Data Access Tokens</button>
-        <button onClick={ (e) => buyAccess() }>Buy Access</button>
-        <button onClick={ (e) => provide() }>Provide Data</button>
+        <button onClick={ (e) => handleError(buyTokens) }>Buy Data Access Tokens</button>
+        <button onClick={ (e) => handleError(buyAccess) }>Buy Access</button>
+        <button onClick={ (e) => handleError(provide) }>Provide Data</button>
       </main>
       <footer className='navbar navbar-expand-lg navbar-dark bg-dark text-light mt-5'>
         <div className='container justify-content-md-center'>
