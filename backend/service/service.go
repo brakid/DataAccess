@@ -7,28 +7,13 @@ import (
 	"net/http"
 	"sync"
 
+	"github.com/brakid/dataaccess/database"
 	"github.com/brakid/dataaccess/utils"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/gin-gonic/gin"
 )
 
-type Record struct {
-	Age    int64
-	Weight float64
-	Height float64
-}
-
-type ProvideContent struct {
-	Records       []Record
-	SenderAddress string
-}
-
-type BuyContent struct {
-	RecordCount  int64
-	BuyerAddress string
-}
-
-func HandleProvide(transactionSigner *utils.TransactionSigner) func(context *gin.Context) {
+func HandleProvide(inMemoryDatabase *database.InMemoryDatabase, transactionSigner *utils.TransactionSigner) func(context *gin.Context) {
 	return func(context *gin.Context) {
 		jsonData, err := ioutil.ReadAll(context.Request.Body)
 
@@ -36,7 +21,7 @@ func HandleProvide(transactionSigner *utils.TransactionSigner) func(context *gin
 			context.String(http.StatusBadGateway, err.Error())
 			return
 		}
-		providedRecords := ProvideContent{}
+		providedRecords := utils.ProvideContent{}
 		err = json.Unmarshal(jsonData, &providedRecords)
 
 		if err != nil {
@@ -46,6 +31,7 @@ func HandleProvide(transactionSigner *utils.TransactionSigner) func(context *gin
 
 		fmt.Println(providedRecords)
 
+		inMemoryDatabase.StoreRecords(&providedRecords.Records)
 		recordCount := int64(len(providedRecords.Records))
 
 		if common.IsHexAddress(providedRecords.SenderAddress) == false {
@@ -72,7 +58,7 @@ func HandleProvide(transactionSigner *utils.TransactionSigner) func(context *gin
 	}
 }
 
-func HandleBuy(receivedBuyEvents *sync.Map) func(context *gin.Context) {
+func HandleBuy(inMemoryDatabase *database.InMemoryDatabase, receivedBuyEvents *sync.Map) func(context *gin.Context) {
 	return func(context *gin.Context) {
 		jsonData, err := ioutil.ReadAll(context.Request.Body)
 
@@ -80,7 +66,7 @@ func HandleBuy(receivedBuyEvents *sync.Map) func(context *gin.Context) {
 			context.String(http.StatusBadGateway, err.Error())
 			return
 		}
-		buyContent := BuyContent{}
+		buyContent := utils.BuyContent{}
 		err = json.Unmarshal(jsonData, &buyContent)
 
 		if err != nil {
@@ -103,7 +89,12 @@ func HandleBuy(receivedBuyEvents *sync.Map) func(context *gin.Context) {
 
 		if ok {
 			receivedBuyEvents.Delete(eventIdentifier) // preventing multiple access
-			context.String(http.StatusOK, fmt.Sprintf("Returning %v records", eventIdentifier.RecordCount))
+			records, err := inMemoryDatabase.RetrieveRecords(eventIdentifier.RecordCount)
+			if err != nil {
+				context.String(http.StatusInternalServerError, err.Error())
+				return
+			}
+			context.JSON(http.StatusOK, records)
 			return
 		}
 

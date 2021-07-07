@@ -5,6 +5,7 @@ import (
 	"log"
 	"sync"
 
+	"github.com/brakid/dataaccess/database"
 	"github.com/brakid/dataaccess/service"
 	"github.com/brakid/dataaccess/utils"
 	"github.com/ethereum/go-ethereum/common"
@@ -39,13 +40,15 @@ func main() {
 		log.Fatal(err)
 	}
 
+	inMemoryDatabase := database.InstantiateDatabase()
+
 	gin.ForceConsoleColor()
 	r := gin.Default()
 
 	r.Use(cors.Default())
 
-	r.POST("/provide", service.HandleProvide(transactionSigner))
-	r.POST("/buy", service.HandleBuy(&receivedBuyEvents))
+	r.POST("/provide", service.HandleProvide(inMemoryDatabase, transactionSigner))
+	r.POST("/buy", service.HandleBuy(inMemoryDatabase, &receivedBuyEvents))
 
 	r.Run()
 }

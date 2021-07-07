@@ -55,3 +55,19 @@ func CreateProvideTransaction(recordCount int64, senderAddress *common.Address) 
 	timestamp := time.Now().Unix()
 	return &ProvideTransaction{recordCount, timestamp, senderAddress}, nil
 }
+
+type Record struct {
+	Age    int64
+	Weight float64
+	Height float64
+}
+
+type ProvideContent struct {
+	Records       []Record
+	SenderAddress string
+}
+
+type BuyContent struct {
+	RecordCount  int64
+	BuyerAddress string
+}
