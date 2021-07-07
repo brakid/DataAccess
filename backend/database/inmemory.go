@@ -44,3 +44,7 @@ func (database *InMemoryDatabase) RetrieveRecords(recordCount int64) (*[]utils.R
 
 	return &returnRecords, nil
 }
+
+func (database *InMemoryDatabase) RecordCount() int64 {
+	return int64(len(*database.records))
+}

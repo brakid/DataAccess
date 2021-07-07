@@ -102,3 +102,10 @@ func HandleBuy(inMemoryDatabase *database.InMemoryDatabase, receivedBuyEvents *s
 		return
 	}
 }
+
+func HandleRecordCount(inMemoryDatabase *database.InMemoryDatabase) func(context *gin.Context) {
+	return func(context *gin.Context) {
+		context.JSON(http.StatusOK, inMemoryDatabase.RecordCount())
+		return
+	}
+}

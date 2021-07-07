@@ -32,3 +32,9 @@ export interface SignedTransaction {
   provideTransaction: ProvideTransaction,
   signature: string
 }
+
+export interface Record {
+  age: number,
+  weight: number,
+  height: number,
+}

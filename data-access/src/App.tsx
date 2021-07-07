@@ -5,7 +5,7 @@ import { getWeb3Provider, getWebsocketProvider } from './utils/ethereum';
 import { LARGE_ALLOWANCE, showConfirmation, showError } from './utils/helpers';
 import { utils } from 'ethers';
 import { EthereumData, Contracts, Providers, Block, SignedTransaction } from './utils/types';
-import { buyData, provideData } from './utils/service';
+import { buyData, provideData, recordCountAvailable } from './utils/service';
 
 export const defaultBlock: Block = {
   blockNumber: -1,
@@ -80,10 +80,11 @@ const App = () => {
       await contracts?.dataAccessToken.increaseAllowance(contracts.dataProviderToken.address, LARGE_ALLOWANCE);
     }
 
-    const buyTransaction = await contracts?.dataProviderToken.buy(1000);
+    const recordCount = await recordCountAvailable();
+    const buyTransaction = await contracts?.dataProviderToken.buy(recordCount);
     await buyTransaction.wait();
-    setConfirmation('Buying records successful');
-    console.log(await buyData(1000, address || ''));
+    setConfirmation('Buying ' + recordCount + ' records successful');
+    console.log(JSON.stringify(await buyData(recordCount, address || '')));
   }
 
   const provide = async () => {

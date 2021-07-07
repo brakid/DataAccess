@@ -49,6 +49,7 @@ func main() {
 
 	r.POST("/provide", service.HandleProvide(inMemoryDatabase, transactionSigner))
 	r.POST("/buy", service.HandleBuy(inMemoryDatabase, &receivedBuyEvents))
+	r.GET("/records", service.HandleRecordCount(inMemoryDatabase))
 
 	r.Run()
 }
