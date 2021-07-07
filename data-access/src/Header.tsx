@@ -1,11 +1,12 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { BigNumber } from '@ethersproject/bignumber';
-import { EthereumContext } from './App';
-import { Contracts, EthereumData } from './utils/types';
+import { EthereumContext, LogContext } from './App';
+import { Contracts, EthereumData, LogData } from './utils/types';
 import { ethers } from 'ethers';
 
 const Header = () => {
   const { address, block, data: contracts }  = useContext<EthereumData<Contracts>>(EthereumContext);
+  const { setError, setConfirmation }  = useContext<LogData>(LogContext);
   const [ usdcBalance, setUsdcBalance ] = useState<BigNumber>(BigNumber.from(0));
   const [ usdcDecimals, setUsdcDecimals ] = useState<number>(6);
   const [ dataAccessTokenBalance, setDataAccessTokenBalance ] = useState<BigNumber>(BigNumber.from(0));
@@ -28,6 +29,22 @@ const Header = () => {
     getBalances();
   }, [ block, contracts, address ]);
 
+  const handleError = async (call: () => Promise<void>) => {
+    try {
+      setError('');
+      setConfirmation('');
+      await call()
+    } catch (e) {
+      setError(JSON.stringify(e));
+    }
+  }
+
+  const claimEarnings = async () => {
+    const claimTransaction = await contracts?.dataProviderToken.claim();
+    await claimTransaction.wait();
+    setConfirmation('Successfully claimed earnings');
+  }
+
   return (
     <nav className='navbar navbar-expand-lg navbar-dark bg-dark pb-2'>
       <div className='container justify-content-md-center'>
@@ -42,8 +59,8 @@ const Header = () => {
             </div>
             <div className='col-md-6 pl-0'>
               <div className='col-12'><i className='fas fa-comment-dollar'></i> USDC Balance: { ethers.utils.formatUnits(usdcBalance, usdcDecimals) } USDC</div>
-              <div className='col-12'><i className='fas fa-comment-dollar'></i> DataAccessTokens: { ethers.utils.formatUnits(dataAccessTokenBalance, dataAccessTokenDecimals) }</div>
-              <div className='col-12'><i className='fas fa-comment-dollar'></i> DataProviderTokens: { dataProviderTokenBalance.toString() }, { ethers.utils.formatUnits(dataAccessTokenClaims, dataAccessTokenDecimals) } claimable</div>
+              <div className='col-12'><i className='fas fa-lock-open'></i> DataAccessTokens: { ethers.utils.formatUnits(dataAccessTokenBalance, dataAccessTokenDecimals) }</div>
+              <div className='col-12'><i className='fas fa-list-alt'></i> DataProviderTokens: { dataProviderTokenBalance.toString() }, { ethers.utils.formatUnits(dataAccessTokenClaims, dataAccessTokenDecimals) } claimable - <button onClick={ (e) => handleError(claimEarnings) } disabled={ dataAccessTokenClaims.isZero() } >Claim Earnings</button></div>
             </div>
           </div>
         </div>

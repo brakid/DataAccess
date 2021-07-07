@@ -14,15 +14,8 @@ export const provideData = async (senderAddress: string): Promise<SignedTransact
     });
       
     const jsonContent = await response.json();
-
-    return {
-      provideTransaction: {
-        recordCount: jsonContent['ProvideTransaction']['RecordCount'],
-        timestamp: jsonContent['ProvideTransaction']['Timestamp'],
-        senderAddress: jsonContent['ProvideTransaction']['SenderAddress'],
-      },
-      signature: jsonContent['Signature']
-    }
+    
+    return jsonContent;
   } catch (e) {
     throw new Error(e);
   }

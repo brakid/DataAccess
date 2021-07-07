@@ -2,10 +2,17 @@ import React, { useEffect, useState } from 'react';
 import Header from './Header';
 import { getContracts } from './utils/contracts';
 import { getWeb3Provider, getWebsocketProvider } from './utils/ethereum';
-import { LARGE_ALLOWANCE, showConfirmation, showError } from './utils/helpers';
-import { utils } from 'ethers';
-import { EthereumData, Contracts, Providers, Block, SignedTransaction } from './utils/types';
-import { buyData, provideData, recordCountAvailable } from './utils/service';
+import { showConfirmation, showError } from './utils/helpers';
+import { EthereumData, Contracts, Providers, Block, LogData } from './utils/types';
+import BuyView from './BuyView';
+import ProvideView from './ProvideView';
+import {
+  BrowserRouter as Router,
+  Switch,
+  Route,
+  Link
+} from "react-router-dom";
+import About from './About';
 
 export const defaultBlock: Block = {
   blockNumber: -1,
@@ -13,6 +20,7 @@ export const defaultBlock: Block = {
 };
 
 export const EthereumContext = React.createContext<EthereumData<Contracts>>({ block: defaultBlock });
+export const LogContext = React.createContext<LogData>({ setError: (_) => {} , setConfirmation: (_) => {} });
 
 const App = () => {
   const [ providers, setProviders ] = useState<Providers>();
@@ -53,71 +61,38 @@ const App = () => {
     init();
   }, []);
 
-  const handleError = async (call: () => Promise<void>) => {
-    try {
-      setError('');
-      setConfirmation('');
-      await call()
-    } catch (e) {
-      setError(JSON.stringify(e));
-    }
-  }
-
-  const buyTokens = async () => {
-    const usdcAllowance = await contracts?.usdc.allowance(address, contracts.dataAccessToken.address);
-    if (usdcAllowance < 1) {
-      await contracts?.usdc.increaseAllowance(contracts.dataAccessToken.address, LARGE_ALLOWANCE);
-    }
-
-    const buyTransaction = await contracts?.dataAccessToken.mint(utils.parseUnits("100", 18));
-    await buyTransaction.wait();
-    setConfirmation('Buying access tokens successful');
-  }
-
-  const buyAccess = async () => {
-    const dataAccessTokenAllowance = await contracts?.dataAccessToken.allowance(address, contracts.dataProviderToken.address);
-    if (dataAccessTokenAllowance < 1) { 
-      await contracts?.dataAccessToken.increaseAllowance(contracts.dataProviderToken.address, LARGE_ALLOWANCE);
-    }
-
-    const recordCount = await recordCountAvailable();
-    const buyTransaction = await contracts?.dataProviderToken.buy(recordCount);
-    await buyTransaction.wait();
-    setConfirmation('Buying ' + recordCount + ' records successful');
-    console.log(JSON.stringify(await buyData(recordCount, address || '')));
-  }
-
-  const provide = async () => {
-    const signedTransaction: SignedTransaction = await provideData(address || '');
-
-    const provideTransaction = await contracts?.dataProviderToken.provide(signedTransaction.provideTransaction.recordCount, signedTransaction.provideTransaction.timestamp, signedTransaction.signature);
-    await provideTransaction.wait();
-    setConfirmation('Providing records successful');
-  }
-
-  const claim = async () => {
-    const claimTransaction = await contracts?.dataProviderToken.claim();
-    await claimTransaction.wait();
-    setConfirmation('Claiming earnings successful');
-  }
-
   return (
     <EthereumContext.Provider value={ { ...providers, address, data: contracts, block } }>
-      <Header />
-      { error && showError(error) }
-      { confirmation && showConfirmation(confirmation) }
-      <main role='main'>
-        <button onClick={ (e) => handleError(buyTokens) }>Buy Data Access Tokens</button>
-        <button onClick={ (e) => handleError(buyAccess) }>Buy Access</button>
-        <button onClick={ (e) => handleError(provide) }>Provide Data</button>
-        <button onClick={ (e) => handleError(claim) }>Claim Earnings</button>
-      </main>
-      <footer className='navbar navbar-expand-lg navbar-dark bg-dark text-light mt-5'>
-        <div className='container justify-content-md-center'>
-          <div className='col-sm-3 text-sm-left text-center'>Blocknumber: { block.blockNumber }</div>
-          <div className='col-sm-3 text-sm-right text-center'>&copy; Hagen Schupp 2021</div>
-        </div>
-      </footer>
+      <LogContext.Provider value={{ setError, setConfirmation}}>
+        <Router>
+          <Header />
+          { error && showError(error) }
+          { confirmation && showConfirmation(confirmation) }
+          <main role='main'>
+            <ul>
+              <li><Link to='/buy'>Buy Records</Link></li>
+              <li><Link to='/provide'>Provide Records</Link></li>
+            </ul>
+            <Switch>
+              <Route path='/buy'>
+                <BuyView />
+              </Route>
+              <Route path='/provide'>
+                <ProvideView />
+              </Route>
+              <Route path='/'>
+                <About />
+              </Route>
+            </Switch>
+          </main>
+          <footer className='navbar navbar-expand-lg navbar-dark bg-dark text-light mt-5'>
+            <div className='container justify-content-md-center'>
+              <div className='col-sm-3 text-sm-left text-center'>Blocknumber: { block.blockNumber }</div>
+              <div className='col-sm-3 text-sm-right text-center'>&copy; Hagen Schupp 2021</div>
+            </div>
+          </footer>
+        </Router>
+      </LogContext.Provider>
     </EthereumContext.Provider>
   );
 }

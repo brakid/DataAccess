@@ -74,8 +74,6 @@ func HandleBuy(inMemoryDatabase *database.InMemoryDatabase, receivedBuyEvents *s
 			return
 		}
 
-		fmt.Println(buyContent)
-
 		if common.IsHexAddress(buyContent.BuyerAddress) == false {
 			context.String(http.StatusBadRequest, "Invalid Sender Address")
 			return

@@ -33,14 +33,14 @@ type TransactionSigner struct {
 }
 
 type ProvideTransaction struct {
-	RecordCount   int64
-	Timestamp     int64
-	SenderAddress *common.Address
+	RecordCount   int64           `json:"recordCount"`
+	Timestamp     int64           `json:"timestamp"`
+	SenderAddress *common.Address `json:"senderAddress"`
 }
 
 type SignedProvideTransaction struct {
-	ProvideTransaction *ProvideTransaction
-	Signature          string
+	ProvideTransaction *ProvideTransaction `json:"provideTransaction"`
+	Signature          string              `json:"signature"`
 }
 
 func CreateProvideTransaction(recordCount int64, senderAddress *common.Address) (*ProvideTransaction, error) {
@@ -57,17 +57,17 @@ func CreateProvideTransaction(recordCount int64, senderAddress *common.Address) 
 }
 
 type Record struct {
-	Age    int64
-	Weight float64
-	Height float64
+	Age    int64   `json:"age"`
+	Weight float64 `json:"weight"`
+	Height float64 `json:"height"`
 }
 
 type ProvideContent struct {
-	Records       []Record
-	SenderAddress string
+	Records       []Record `json:"records"`
+	SenderAddress string   `json:"senderAddress"`
 }
 
 type BuyContent struct {
-	RecordCount  int64
-	BuyerAddress string
+	RecordCount  int64  `json:"recordCount"`
+	BuyerAddress string `json:"buyerAddress"`
 }

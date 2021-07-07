@@ -16,6 +16,11 @@ export interface EthereumData<T> extends Providers {
   data?: T,
 };
 
+export interface LogData extends Providers {
+  setError: (error: string) => void,
+  setConfirmation: (confirmation: string) => void,
+};
+
 export interface Contracts {
   usdc: ethers.Contract,
   dataAccessToken: ethers.Contract,
