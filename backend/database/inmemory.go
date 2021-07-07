@@ -1,6 +1,7 @@
 package database
 
 import (
+	"errors"
 	"math/rand"
 	"time"
 
@@ -20,16 +21,26 @@ func InstantiateDatabase() *InMemoryDatabase {
 	return &inMemoryDatabase
 }
 
-func (database *InMemoryDatabase) StoreRecords(records *[]utils.Record) {
+func (database *InMemoryDatabase) StoreRecords(records *[]utils.Record) bool {
 	*(database.records) = append(*database.records, *records...)
+	return true
 }
 
 func (database *InMemoryDatabase) RetrieveRecords(recordCount int64) (*[]utils.Record, error) {
-	records := *database.records
+	if recordCount < 0 {
+		return nil, errors.New("Invalid record count")
+	}
+	records := make([]utils.Record, len(*database.records))
+	copy(records, *database.records)
 
 	rand.Shuffle(len(records), func(i, j int) { records[i], records[j] = records[j], records[i] })
 
-	returnRecords := records[0:recordCount]
+	recordCountToReturn := recordCount
+	if recordCount > int64(len(records)) {
+		recordCountToReturn = int64(len(records))
+	}
+
+	returnRecords := records[0:recordCountToReturn]
 
 	return &returnRecords, nil
 }

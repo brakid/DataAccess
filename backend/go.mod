@@ -9,4 +9,5 @@ require (
 	github.com/google/go-cmp v0.5.6
 	github.com/miguelmota/go-ethereum-hdwallet v0.0.1
 	github.com/miguelmota/go-solidity-sha3 v0.1.1
+	github.com/stretchr/testify v1.7.0
 )
