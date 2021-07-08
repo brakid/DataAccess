@@ -1,8 +1,6 @@
 import { Record, SignedTransaction } from "./types";
 
-export const provideData = async (senderAddress: string): Promise<SignedTransaction> => {
-  const records: Record[] = [ { age: 1, weight: 10, height: 5 }, { age: 2, weight: 20, height: 10 } ];
-
+export const provideRecords = async (senderAddress: string, records: Record[]): Promise<SignedTransaction> => {
   try {
     const response = await fetch('http://localhost:8080/provide', {
       method: 'POST',
@@ -14,7 +12,7 @@ export const provideData = async (senderAddress: string): Promise<SignedTransact
     });
       
     const jsonContent = await response.json();
-    
+
     return jsonContent;
   } catch (e) {
     throw new Error(e);
@@ -38,7 +36,7 @@ export const recordCountAvailable = async (): Promise<number> => {
   }
 }
 
-export const buyData = async (recordCount: number, buyerAddress: string): Promise<Record[]> => {
+export const buyRecords = async (recordCount: number, buyerAddress: string, signature: string): Promise<Record[]> => {
   try {
     const response = await fetch('http://localhost:8080/buy', {
       method: 'POST',
@@ -46,7 +44,7 @@ export const buyData = async (recordCount: number, buyerAddress: string): Promis
         'Accept': 'application/json',
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ recordCount, buyerAddress })
+      body: JSON.stringify({ recordCount, buyerAddress, signature })
     });
       
     const jsonContent = await response.json();

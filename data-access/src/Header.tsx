@@ -60,7 +60,8 @@ const Header = () => {
             <div className='col-md-6 pl-0'>
               <div className='col-12'><i className='fas fa-comment-dollar'></i> USDC Balance: { ethers.utils.formatUnits(usdcBalance, usdcDecimals) } USDC</div>
               <div className='col-12'><i className='fas fa-lock-open'></i> DataAccessTokens: { ethers.utils.formatUnits(dataAccessTokenBalance, dataAccessTokenDecimals) }</div>
-              <div className='col-12'><i className='fas fa-list-alt'></i> DataProviderTokens: { dataProviderTokenBalance.toString() }, { ethers.utils.formatUnits(dataAccessTokenClaims, dataAccessTokenDecimals) } claimable - <button onClick={ (e) => handleError(claimEarnings) } disabled={ dataAccessTokenClaims.isZero() } >Claim Earnings</button></div>
+              <div className='col-12'><i className='fas fa-list-alt'></i> DataProviderTokens: { dataProviderTokenBalance.toString() }</div>
+              <div className='col-12'><i className='fas fa-exclamation-circle'></i> { ethers.utils.formatUnits(dataAccessTokenClaims, dataAccessTokenDecimals) } claimable <button className='btn btn-primary' onClick={ (e) => handleError(claimEarnings) } disabled={ dataAccessTokenClaims.isZero() } >Claim Earnings</button></div>
             </div>
           </div>
         </div>

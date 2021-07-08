@@ -27,3 +27,10 @@ export const showConfirmation = (confirmation: string | undefined): JSX.Element 
     </div>
   );
 }
+
+export const get = (value: string | undefined): string => {
+  if (!!!value) {
+    throw Error('No value present');
+  }
+  return value;
+}

@@ -1,7 +1,8 @@
 import React, { useContext, useState } from 'react';
 import { EthereumData, Contracts, LogData, Record, SignedTransaction } from './utils/types';
-import { provideData } from './utils/service';
+import { provideRecords } from './utils/service';
 import { EthereumContext, LogContext } from './App';
+import { get } from './utils/helpers';
 
 const ProvideView = () => {
   const { address, data: contracts }  = useContext<EthereumData<Contracts>>(EthereumContext);
@@ -19,7 +20,8 @@ const ProvideView = () => {
   }
 
   const provide = async () => {
-    const signedTransaction: SignedTransaction = await provideData(address || '');
+    const records: Record[] = [ { age: 1, weight: 10, height: 5 }, { age: 2, weight: 20, height: 10 } ];
+    const signedTransaction: SignedTransaction = await provideRecords(get(address), records);
 
     const provideTransaction = await contracts?.dataProviderToken.provide(signedTransaction.provideTransaction.recordCount, signedTransaction.provideTransaction.timestamp, signedTransaction.signature);
     await provideTransaction.wait();

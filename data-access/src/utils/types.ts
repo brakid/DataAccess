@@ -1,4 +1,4 @@
-import { ethers } from 'ethers';
+import { ethers, Signer } from 'ethers';
 
 export interface Providers {
   web3Provider?: ethers.providers.Web3Provider,
@@ -12,6 +12,7 @@ export interface Block {
 
 export interface EthereumData<T> extends Providers {
   address?: string,
+  signer?: Signer,
   block: Block,
   data?: T,
 };

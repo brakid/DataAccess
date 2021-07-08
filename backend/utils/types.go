@@ -70,4 +70,5 @@ type ProvideContent struct {
 type BuyContent struct {
 	RecordCount  int64  `json:"recordCount"`
 	BuyerAddress string `json:"buyerAddress"`
+	Signature    string `json:"signature"`
 }

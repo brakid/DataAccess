@@ -34,7 +34,6 @@ const App = () => {
     const init = async () => {
       const web3Provider = await getWeb3Provider();
       const websocketProvider = await getWebsocketProvider();
-
       setBlock({
         blockNumber: await websocketProvider.getBlockNumber(),
         timestamp: new Date(),
@@ -61,8 +60,10 @@ const App = () => {
     init();
   }, []);
 
+  const signer = providers?.web3Provider?.getSigner();
+
   return (
-    <EthereumContext.Provider value={ { ...providers, address, data: contracts, block } }>
+    <EthereumContext.Provider value={ { signer, address, data: contracts, block } }>
       <LogContext.Provider value={{ setError, setConfirmation}}>
         <Router>
           <Header />

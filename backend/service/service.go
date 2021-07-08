@@ -81,6 +81,17 @@ func HandleBuy(inMemoryDatabase *database.InMemoryDatabase, receivedBuyEvents *s
 
 		buyerAddress := common.HexToAddress(buyContent.BuyerAddress)
 
+		signature := common.Hex2Bytes(buyContent.Signature[2:])
+		valid, err := utils.ValidateSignature(&buyerAddress, buyContent.RecordCount, signature)
+		if err != nil {
+			context.String(http.StatusBadRequest, err.Error())
+			return
+		}
+		if !valid {
+			context.String(http.StatusForbidden, "Invalid signature provided")
+			return
+		}
+
 		eventIdentifier := utils.EventIdentifier{BuyerAddress: buyerAddress, RecordCount: buyContent.RecordCount}
 
 		_, ok := receivedBuyEvents.Load(eventIdentifier)
