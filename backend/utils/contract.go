@@ -8,8 +8,8 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi"
 )
 
-func GetContractAbi() (*abi.ABI, error) {
-	data, err := ioutil.ReadFile("./abi/DataProviderToken.json")
+func GetContractAbi(fileName string) (*abi.ABI, error) {
+	data, err := ioutil.ReadFile(fileName)
 	if err != nil {
 		return nil, err
 	}

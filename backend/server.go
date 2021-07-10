@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"sync"
 
@@ -15,30 +14,34 @@ import (
 )
 
 func main() {
-	contractAbi, err := utils.GetContractAbi()
+	contractAddress := common.HexToAddress(utils.Get("CONTRACT_ADDRESS", "0x734A805767578Da71b6c7B13fd9DdbDaC2b55238"))
+	contractFile := utils.Get("CONTRACT_FILE", "./abi/DataProviderToken.json")
+	mnemonic := utils.Get("MNEMONIC", "impose believe guitar thrive clean tourist attitude edge swim stuff salon tiny")
+	ethereumAddress := utils.Get("ETHEREUM_ADDRESS", "ws://127.0.0.1:9545/")
+
+	contractAbi, err := utils.GetContractAbi(contractFile)
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	contractAddress := common.HexToAddress("0x734A805767578Da71b6c7B13fd9DdbDaC2b55238")
 	contract := utils.Contract{ContractAddress: &contractAddress, ContractAbi: contractAbi}
 
 	receivedBuyEvents := sync.Map{}
 
-	fmt.Println("Started")
-	client, err := ethclient.Dial("ws://127.0.0.1:9545/")
+	log.Println("Started")
+	client, err := ethclient.Dial(ethereumAddress)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	fmt.Println("Connection established")
+	log.Println("Connection established")
 
 	go service.ReceiveEvents(client, &receivedBuyEvents, &contract)
 
-	transactionSigner, err := utils.InstantiateTransactionSigner()
+	transactionSigner, err := utils.InstantiateTransactionSigner(mnemonic)
 	if err != nil {
 		log.Fatal(err)
 	}
+	log.Printf("Signer account: %v\n", transactionSigner.SignerAccount.Address.Hex())
 
 	inMemoryDatabase := database.InstantiateDatabase()
 

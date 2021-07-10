@@ -11,8 +11,7 @@ import (
 	solsha3 "github.com/miguelmota/go-solidity-sha3"
 )
 
-func InstantiateTransactionSigner() (*TransactionSigner, error) {
-	mnemonic := "impose believe guitar thrive clean tourist attitude edge swim stuff salon tiny"
+func InstantiateTransactionSigner(mnemonic string) (*TransactionSigner, error) {
 	wallet, err := hdwallet.NewFromMnemonic(mnemonic)
 	if err != nil {
 		return nil, err
@@ -23,8 +22,6 @@ func InstantiateTransactionSigner() (*TransactionSigner, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	fmt.Printf("Signer account: %v\n", account.Address.Hex())
 
 	return &TransactionSigner{wallet, &account}, nil
 }
