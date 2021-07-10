@@ -4,6 +4,7 @@ import { utils } from 'ethers';
 import { EthereumData, Contracts, LogData, Record } from './utils/types';
 import { buyRecords, recordCountAvailable } from './utils/service';
 import { EthereumContext, LogContext } from './App';
+import { greaterEqualZero, IntInputField } from './utils/InputField';
 
 const BuyView = () => {
   const { signer, address, data: contracts }  = useContext<EthereumData<Contracts>>(EthereumContext);
@@ -60,28 +61,9 @@ const BuyView = () => {
     setConfirmation('Successfully bought ' + recordCountToBuy + ' records');
   }
 
-  const updateTokenCount = (value: string): void => {
-    try {
-      const tokenCount = parseInt(value);
-      if (tokenCount >= 0) {
-        setTokenCount(tokenCount);
-      }
-    } catch (e) {
-      setError(JSON.stringify(e));
-    }
-  }
-
-  const updateRecordCount = (value: string): void => {
-    try {
-      const recordCount = parseInt(value);
-      if (recordCount >= 0) {
-        setRecordCount(recordCount);
-      }
-      if (recordCount > availableRecordCount) {
-        setError('The database has ' + availableRecordCount + ' records');
-      }
-    } catch (e) {
-      setError(JSON.stringify(e));
+  const updateRecordCount = (recordCount: number): void => {
+    if (recordCount > availableRecordCount) {
+      setError('The database has ' + availableRecordCount + ' records');
     }
   }
 
@@ -100,10 +82,10 @@ const BuyView = () => {
       <button onClick={ (e) => sign() }>Sign</button>
         
       <div className='form-group'>
-        <input type='text' value={ '' + recordCount } onChange={ (e) => updateTokenCount(e.target.value) } />
+        <IntInputField value={ tokenCount } returnValue={ greaterEqualZero(setTokenCount) } handleError={ setError } />
         <button onClick={ (e) => handleError(buyAccessTokensCall) }>Buy Data Access Tokens</button>
         This will cost { tokenCount } USDC.
-        <input type='text' value={ '' + recordCount } onChange={ (e) => updateRecordCount(e.target.value) } />
+        <IntInputField value={ recordCount } returnValue={ greaterEqualZero(updateRecordCount) } handleError={ setError } />
         <button onClick={ (e) => handleError(() => buyRecordsCall(recordCount)) }>Buy Records</button>
         This will cost { recordCount / 1000.0 } DataAccessTokens.
       </div>
