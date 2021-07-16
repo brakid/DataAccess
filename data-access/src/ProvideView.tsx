@@ -4,6 +4,7 @@ import { provideRecords } from './utils/service';
 import { EthereumContext, LogContext } from './App';
 import { get } from './utils/helpers';
 import { IntInputField, greaterEqualZero } from './utils/InputField';
+import RecordView from './RecordView';
 
 interface AddRecordProps {
   addRecord: (record: Record) => void,
@@ -72,6 +73,12 @@ const ProvideView = () => {
     setRecords(newRecords);
   }
 
+  const removeRecord = (index: number): void => {
+    const newRecords = records.slice(0);
+    newRecords.splice(index, 1);
+    setRecords(newRecords);
+  }
+
   return (
     <div>
       <button onClick={ (e) => handleError(provide) }>Provide records</button>
@@ -79,7 +86,7 @@ const ProvideView = () => {
         <h2>Records to provide</h2>
         <ul>
           { records.map((record, index) => 
-            (<li key={ index }>{ JSON.stringify(record) }</li>)
+            (<li key={ index }><RecordView record={ record } /> <button onClick={ () => removeRecord(index) }>Remove</button></li>)
           )}
         </ul>
         <AddRecord addRecord={ addRecord } handleError={ setError } />

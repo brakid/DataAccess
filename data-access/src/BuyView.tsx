@@ -5,6 +5,7 @@ import { EthereumData, Contracts, LogData, Record } from './utils/types';
 import { buyRecords, recordCountAvailable } from './utils/service';
 import { EthereumContext, LogContext } from './App';
 import { greaterEqualZero, IntInputField } from './utils/InputField';
+import RecordView from './RecordView';
 
 const BuyView = () => {
   const { signer, address, data: contracts }  = useContext<EthereumData<Contracts>>(EthereumContext);
@@ -67,20 +68,8 @@ const BuyView = () => {
     }
   }
 
-  const sign = async () => {
-    const hash = utils.solidityKeccak256(['address', 'uint256'], [get(address), 10]);
-    const signature = get(await signer?.signMessage(hash));
-    console.log('Signature1: ' + signature);
-
-    console.log(await utils.verifyMessage(hash, signature) === address);
-    console.log(address);
-    return;
-  };
-
   return (
     <div>
-      <button onClick={ (e) => sign() }>Sign</button>
-        
       <div className='form-group'>
         <IntInputField value={ tokenCount } returnValue={ greaterEqualZero(setTokenCount) } handleError={ setError } />
         <button onClick={ (e) => handleError(buyAccessTokensCall) }>Buy Data Access Tokens</button>
@@ -93,7 +82,7 @@ const BuyView = () => {
         (<div>
           <h1>Records</h1>
           <ul>
-            { records.map((record, index) => (<li key={ index }>{ JSON.stringify(record) }</li>)) }
+            { records.map((record, index) => (<li key={ index }><RecordView record= { record } /></li>)) }
           </ul>
         </div>)
       }
