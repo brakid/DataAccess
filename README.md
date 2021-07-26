@@ -21,6 +21,11 @@ everytime someone uses the dataset their data is in, they receive a commission.
  * whoever holds a token at the moment someone buys will receive them.
 * there is a fee of 5% when buying datasets, meaning 95% of the price will be distributed to holders of DataProviderTokens.
 
+### Workflows
+![alt text](./images/ProvideRecords.png "Provide records")
+
+![alt text](./images/BuyRecords.png "Buy records")
+
 **Rewards can be claimed at any time**
 
 ### DataProviderTokens:
